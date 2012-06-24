@@ -32,7 +32,6 @@ Client::Client(QWidget *parent)
     waitList = false;
 
     udpSocket = new QUdpSocket(this);
-    udpSocketSend = new QUdpSocket(this);
     udpSocket->bind(port, QUdpSocket::ShareAddress);
     udpSocket->joinMulticastGroup(groupAddress);
 
@@ -59,7 +58,6 @@ Client::Client(QWidget *parent)
 void Client::ttlChanged(int newTtl)
 {
     udpSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, newTtl);
-    udpSocketSend->setSocketOption(QAbstractSocket::MulticastTtlOption, newTtl);
 }
 
 void Client::processPendingDatagrams()
@@ -189,8 +187,7 @@ void Client::processPendingDatagrams()
                 datagram_to_send += mess.message[i];
             printf("--size after message added: %d\n", datagram_to_send.size());
             fflush(stdout);
-            //udpSocket->writeDatagram(datagram_to_send, datagram_to_send.size(),groupAddress, htons(port));
-            udpSocketSend->writeDatagram(datagram_to_send, datagram_to_send.size(),groupAddress, htons(port));
+            udpSocket->writeDatagram(datagram_to_send, datagram_to_send.size(),groupAddress, htons(port));
         } else if((new_mess.op == 5) && waitList) {
             /* got answer with list of rooms */
             //int mes_len = atoi(string(datagram.data(), 73, 2).c_str());
@@ -356,8 +353,7 @@ void Client::sendDatagram()
                 datagram += QByteArray(mess.message);
                 printf("writing the datagram ...\n");
                 fflush(stdout);
-                //udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
-                udpSocketSend->writeDatagram(datagram, datagram.size(),groupAddress, port);
+                udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }
             exit(0);
         }else{
@@ -383,8 +379,7 @@ void Client::sendDatagram()
                 //datagram += mess.mesLen;
                 datagram += QByteArray(mess.message);
                 //printf("SIZE: %d\n", datagram.length());
-                //udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
-                udpSocketSend->writeDatagram(datagram, datagram.size(),groupAddress, port);
+                udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }
     }
 }

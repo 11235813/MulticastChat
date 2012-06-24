@@ -7,7 +7,7 @@ Client::Client(QWidget *parent)
     : QDialog(parent)
 {
     groupAddress = QHostAddress("233.1.1.1");
-    port = 45454;
+    port = 55555;
 
     strcpy(mess.id, "Cristina\0");
     listRooms.push_back(string("room1\0"));
@@ -348,7 +348,7 @@ void Client::sendDatagram()
                 };
                 datagram += QByteArray(mess.id);
                 for(int i = strlen(mess.id); i < 32; i++) {
-                    datagram += QByteArray::number(0);
+                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 }
                 datagram += mess.op;

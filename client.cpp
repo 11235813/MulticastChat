@@ -32,7 +32,7 @@ Client::Client(QWidget *parent)
     waitList = false;
 
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(7777, QUdpSocket::ShareAddress);
+    udpSocket->bind(port, QUdpSocket::ShareAddress);
     udpSocket->joinMulticastGroup(groupAddress);
 
     connect(ttlSpinBox, SIGNAL(valueChanged(int)), this, SLOT(ttlChanged(int)));
@@ -71,8 +71,8 @@ void Client::processPendingDatagrams()
         memset(&new_mess, 0, sizeof(message_t));
         datagram.resize(udpSocket->pendingDatagramSize());
         udpSocket->readDatagram((char *) &new_mess, datagram.size());//, &groupAddress, &port);
-        if(strcmp(new_mess.version, "CHATv1\0") != 0)
-            return;
+        //if(strcmp(new_mess.version, "CHATv1\0") != 0)
+            //return;
   //      printf("-- got datagram size: %d\n", datagram.size());
         fflush(stdout);
         //printf("reading length: %d\n", datagram.size());
@@ -348,7 +348,7 @@ void Client::sendDatagram()
                 datagram += mess.op;
                 datagram += (char) mess.mesLen;
                 datagram += (mess.mesLen >> 8);
-                QByteArray(mess.message);
+                datagram += QByteArray(mess.message);
 
                 udpSocket->writeDatagram(datagram, datagram.size(),
                                          groupAddress, port);
@@ -370,9 +370,9 @@ void Client::sendDatagram()
                     //datagram += QByteArray::number(0);
                     datagram += '\0';
                 }
-                datagram += mess.op;
-                datagram += (char) mess.mesLen;
-                datagram += (mess.mesLen >> 8);
+                datagram += (htons)mess.op;
+                datagram += (htons)(char) mess.mesLen;
+                datagram += (htons)(mess.mesLen >> 8);
                 //datagram += mess.mesLen;
                 datagram += QByteArray(mess.message);
                 //printf("SIZE: %d\n", datagram.length());

@@ -55,6 +55,7 @@ using namespace std;
      QPushButton *okButton;
      QPushButton *cancelButton;
      QUdpSocket *udpSocket;
+     QUdpSocket *udpSocketSend;
      QHostAddress groupAddress;
      QTimer *timer;
      QDialogButtonBox *buttonBox;

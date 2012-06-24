@@ -6,7 +6,7 @@
 Client::Client(QWidget *parent)
     : QDialog(parent)
 {
-    groupAddress = QHostAddress("233.1.1.1");
+    groupAddress = QHostAddress("233.1.1.2");
     port = 55555;
 
     strcpy(mess.id, "Cristina\0");
@@ -361,6 +361,8 @@ void Client::sendDatagram()
                 udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }
             udpSocket->leaveMulticastGroup(groupAddress);
+            //udpSocket->disconnectFromHost();
+            udpSocket->close();
             exit(0);
         }else{
                 QByteArray datagram = QByteArray(mess.version);

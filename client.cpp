@@ -32,8 +32,8 @@ Client::Client(QWidget *parent)
     waitList = false;
 
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(port, QUdpSocket::ShareAddress);
-    udpSocket->joinMulticastGroup(groupAddress);
+    udpSocket->bind(htons(port), QUdpSocket::ShareAddress);
+    udpSocket->joinMulticastGroup(QHostAddress(htonl(groupAddress.toIPv4Address())));
 
     connect(ttlSpinBox, SIGNAL(valueChanged(int)), this, SLOT(ttlChanged(int)));
     connect(okButton,SIGNAL(clicked()), this, SLOT(sendDatagram()));
@@ -188,7 +188,7 @@ void Client::processPendingDatagrams()
             printf("--size after message added: %d\n", datagram_to_send.size());
             fflush(stdout);
             udpSocket->writeDatagram(datagram_to_send, datagram_to_send.size(),
-                                     groupAddress, port);
+                                     groupAddress, htons(port));
         } else if((new_mess.op == 5) && waitList) {
             /* got answer with list of rooms */
             //int mes_len = atoi(string(datagram.data(), 73, 2).c_str());
@@ -352,7 +352,8 @@ void Client::sendDatagram()
                 datagram += (char) mess.mesLen;
                 datagram += (mess.mesLen >> 8);
                 datagram += QByteArray(mess.message);
-
+                printf("writing the datagram ...\n");
+                fflush(stdout);
                 udpSocket->writeDatagram(datagram, datagram.size(),
                                          groupAddress, port);
             }

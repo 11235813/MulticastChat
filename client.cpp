@@ -7,7 +7,7 @@ Client::Client(QWidget *parent)
     : QDialog(parent)
 {
     groupAddress = QHostAddress("233.1.1.1");
-    port = 7777;
+    port = 45454;
 
     strcpy(mess.id, "Cristina\0");
     listRooms.push_back(string("room1\0"));
@@ -63,6 +63,7 @@ void Client::ttlChanged(int newTtl)
 void Client::processPendingDatagrams()
 {
     while (udpSocket->hasPendingDatagrams()) {
+        printf("HAS PENDING DATAGRAMS...\n");
         QByteArray datagram;
         message_t new_mess;
 
@@ -289,6 +290,7 @@ void Client::sendDatagram()
                 printf("NICK\n");
                 strcpy(mess.roomName, "\0");
                 strcpy(mess.id, splitted.at(1).toUtf8().constData());
+                mess.op = 1;
                 mess.mesLen = 0;
                 strcpy(mess.message, "\0");
             }
@@ -315,12 +317,13 @@ void Client::sendDatagram()
             //int toChop = splitted.at(2).length();
             //toChop-= mess.mesLen;
             //QString newMessage = splitted.at(2);
-            //newMessage.chop(toChop);
+            //newMessage.chop(toChop);strcpy(mess.roomName, splitted.at(1).toUtf8().constData());
             //strcpy(mess.message, newMessage.toUtf8().constData());
 
 
             printf("the message: %s of length %d\n", mess.message,  mess.mesLen);
         }} else{
+            ok = false;
             return;
         }
     }
@@ -370,9 +373,10 @@ void Client::sendDatagram()
                     //datagram += QByteArray::number(0);
                     datagram += '\0';
                 }
-                datagram += (htons)mess.op;
-                datagram += (htons)(char) mess.mesLen;
-                datagram += (htons)(mess.mesLen >> 8);
+                datagram += mess.op;
+                printf("sending operator: %d\n", mess.op);
+                datagram += ((char) mess.mesLen);
+                datagram += (mess.mesLen >> 8);
                 //datagram += mess.mesLen;
                 datagram += QByteArray(mess.message);
                 //printf("SIZE: %d\n", datagram.length());

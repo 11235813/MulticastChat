@@ -72,6 +72,7 @@ void Client::processPendingDatagrams()
         //memset(&new_mess, 0, sizeof(message_t));
         datagram.resize(udpSocket->pendingDatagramSize());
         memset(&new_mess, 0, datagram.size());
+        printf("READING DATAGRAMS OF size %d\n", datagram.size());
         udpSocket->readDatagram((char *) &new_mess, datagram.size());//, &groupAddress, &port);
         //if(strcmp(new_mess.version, "CHATv1\0") != 0)
             //return;
@@ -301,6 +302,7 @@ void Client::sendDatagram()
             /* send message */
             ok = true;
             printf("MESSAGE\n");
+            fflush(stdout);
             strcpy(mess.roomName, splitted.at(1).toUtf8().constData());
             mess.op = 3;
 
@@ -311,8 +313,9 @@ void Client::sendDatagram()
                 strcat(mess.message, " ");
                 mess.mesLen += splitted.at(i).length() + 1;
             }
-            mess.mesLen --;
-            strcat(mess.message - 1, "\0");
+            //mess.mesLen --;
+            //strcat(mess.message, "\0", strlen(mess.message));
+            mess.message[strlen(mess.message) - 1] = '\0';
             //mess.mesLen = min(splitted.at(2).length(), USHRT_MAX);
             //int toChop = splitted.at(2).length();
             //toChop-= mess.mesLen;
@@ -377,9 +380,11 @@ void Client::sendDatagram()
                 printf("sending operator: %d\n", mess.op);
                 datagram += ((char) mess.mesLen);
                 datagram += (mess.mesLen >> 8);
+                printf("datagram size after adding msg len: %d\n", datagram.size());
                 //datagram += mess.mesLen;
                 datagram += QByteArray(mess.message);
-                //printf("SIZE: %d\n", datagram.length());
+                datagram += '\0';
+                printf("WRITING DATAGRAMS OF size: %d\n", datagram.size());
                 udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }
     }

@@ -69,8 +69,9 @@ void Client::processPendingDatagrams()
 
         char ms[75];
 
-        memset(&new_mess, 0, sizeof(message_t));
+        //memset(&new_mess, 0, sizeof(message_t));
         datagram.resize(udpSocket->pendingDatagramSize());
+        memset(&new_mess, 0, datagram.size());
         udpSocket->readDatagram((char *) &new_mess, datagram.size());//, &groupAddress, &port);
         //if(strcmp(new_mess.version, "CHATv1\0") != 0)
             //return;

@@ -383,7 +383,8 @@ void Client::sendDatagram()
                 printf("datagram size after adding msg len: %d\n", datagram.size());
                 //datagram += mess.mesLen;
                 datagram += QByteArray(mess.message);
-                datagram += '\0';
+                if(mess.mesLen > 0)
+                    datagram += '\0';
                 printf("WRITING DATAGRAMS OF size: %d\n", datagram.size());
                 udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }

@@ -220,7 +220,7 @@ void Client::processPendingDatagrams()
                 output.append("\n");
                 outputText->append(output);
             }
-            waitList = false;
+            //waitList = false;
             fflush(stdout);
         }
     }
@@ -252,13 +252,14 @@ void Client::sendDatagram()
         waitList = true;
     } else if(input == "QUIT") {
         ok = true;
+        waitList = false;
         printf("QUIT\n");
         mess.op = 2;
         mess.mesLen = 0;
         strcpy(mess.message, "\0");
     } else {
         QStringList splitted = input.split(QRegExp("\\s"));
-
+        waitList = false;
         if(splitted.length() == 2){
             if((splitted.at(0) == "JOIN") && (isRoom(splitted.at(1).toUtf8().constData()) >= 0)){
                 ok = true;

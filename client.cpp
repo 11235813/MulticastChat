@@ -15,7 +15,7 @@ Client::Client(QWidget *parent)
     listRooms.push_back(string("room3\0"));
 
     okButton = new QPushButton(tr("&Ok"));
-    cancelButton = new QPushButton(tr("&Cancel"));
+    cancelButton = new QPushButton(tr("&Clear"));
 
     ttlLabel = new QLabel(tr("TTL for multicast datagrams:"));
     ttlSpinBox = new QSpinBox;
@@ -359,6 +359,7 @@ void Client::sendDatagram()
                 fflush(stdout);
                 udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }
+            udpSocket->leaveMulticastGroup(groupAddress);
             exit(0);
         }else{
                 QByteArray datagram = QByteArray(mess.version);

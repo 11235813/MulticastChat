@@ -187,7 +187,7 @@ void Client::processPendingDatagrams()
                 datagram_to_send += mess.message[i];
             printf("--size after message added: %d\n", datagram_to_send.size());
             fflush(stdout);
-            udpSocket->writeDatagram(datagram_to_send, datagram_to_send.size(),groupAddress, htons(port));
+            udpSocket->writeDatagram(datagram_to_send, datagram_to_send.size(),groupAddress, port);
         } else if((new_mess.op == 5) && waitList) {
             /* got answer with list of rooms */
             //int mes_len = atoi(string(datagram.data(), 73, 2).c_str());

@@ -6,13 +6,15 @@
 Client::Client(QWidget *parent)
     : QDialog(parent)
 {
-    groupAddress = QHostAddress("233.1.1.2");
-    port = 55555;
+    groupAddress = QHostAddress("230.0.0.1");
+    //groupAddress = QHostAddress("224.0.0.1");
+    port = 7777;
 
     strcpy(mess.id, "Cristina\0");
     listRooms.push_back(string("room1\0"));
     listRooms.push_back(string("room2\0"));
     listRooms.push_back(string("room3\0"));
+    listRooms.push_back(string("cristinaPrecup\0"));
 
     okButton = new QPushButton(tr("&Ok"));
     cancelButton = new QPushButton(tr("&Clear"));
@@ -206,16 +208,22 @@ void Client::processPendingDatagrams()
                 string name("");
                 printf("mess: %s\n", new_mess.message);
 
+                int nrNulls = 0;
                 for(int i = 0; i <=  new_mess.mesLen; i ++) {
                     if(new_mess.message[i] == '\0'){
                         //if(!isRoom(name)){
+                        nrNulls ++;
+                        if(nrNulls == 2)
+                            break;
                         listRooms.push_back(name);
                         output.append(QString::fromStdString(name.c_str()));
                         //printf("NAME:%s\n", name.c_str());
                         output.append("\n");
                         name = "";
-                    } else
+                    } else {
+                        nrNulls = 0;
                         name.push_back(new_mess.message[i]);
+                    }
                 }
                 output.append("\n");
                 outputText->append(output);
@@ -308,7 +316,7 @@ void Client::sendDatagram()
             mess.op = 3;
 
             mess.mesLen = 0;
-            memset(mess.message, 0, 32);
+            memset(mess.message, 0, 1000);
             for(int i = 2; i < splitted.size(); i++) {
                 strcat(mess.message, splitted.at(i).toUtf8().constData());
                 strcat(mess.message, " ");

@@ -29,7 +29,7 @@ using namespace std;
     char id[32];
     uint8_t op;
     uint16_t mesLen;
-    char message[32];
+    char message[1000];
  } __attribute__ ((packed));
 
  class Client : public QDialog

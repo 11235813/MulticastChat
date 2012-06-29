@@ -7,7 +7,6 @@ Client::Client(QWidget *parent)
     : QDialog(parent)
 {
     groupAddress = QHostAddress("230.0.0.1");
-    //groupAddress = QHostAddress("224.0.0.1");
     port = 7777;
 
     strcpy(mess.id, "Cristina\0");
@@ -41,7 +40,6 @@ Client::Client(QWidget *parent)
     connect(okButton,SIGNAL(clicked()), this, SLOT(sendDatagram()));
     connect(udpSocket, SIGNAL(readyRead()),this, SLOT(processPendingDatagrams()));
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(eraseInput()));
-    //connect(timer, SIGNAL(timeout()), this, SLOT(sendDatagram()));
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     outputText = new QTextBrowser;
@@ -71,33 +69,16 @@ void Client::processPendingDatagrams()
 
         char ms[75];
 
-        //memset(&new_mess, 0, sizeof(message_t));
         datagram.resize(udpSocket->pendingDatagramSize());
         memset(&new_mess, 0, datagram.size());
         printf("READING DATAGRAMS OF size %d\n", datagram.size());
-        udpSocket->readDatagram((char *) &new_mess, datagram.size());//, &groupAddress, &port);
-        //if(strcmp(new_mess.version, "CHATv1\0") != 0)
-            //return;
-  //      printf("-- got datagram size: %d\n", datagram.size());
+        udpSocket->readDatagram((char *) &new_mess, datagram.size());
         fflush(stdout);
-        //printf("reading length: %d\n", datagram.size());
-        //printf("version: %s\n", new_mess.version);
-        //string oper(datagram.data(), 72, 1);
 
-        //string oper(new_mess.op, 1);
         printf("operator: %d\n", new_mess.op);
-        //int op =atoi(oper.c_str());
-        //printf("OPTION: %d\n", op);
-        //string room(datagram.data(), 8, 32);
-        //string room(new_mess.roomName);
-        //printf("room: %s\n", room.c_str());
-        //string user(datagram.data(), 40, 32);
-        //string user(new_mess.id);
-        //string u(user, 0, (user.find_first_of('0')));
         if((new_mess.op == 1) && isInRoom(new_mess.roomName) >= 0) {
             /* user joins */
             QString output = "User ";
-            //output.append(QString::fromStdString(u));
             output.append(QString::fromStdString(new_mess.id));
             output.append(" has joined room ");
             output.append(QString::fromStdString(rooms.at(isInRoom(new_mess.roomName))));
@@ -106,7 +87,6 @@ void Client::processPendingDatagrams()
         } else if((new_mess.op == 2) && isInRoom(new_mess.roomName) >= 0) {
             /* user leaves */
             QString output = "User ";
-            //output.append(QString::fromStdString(u));
             output.append(QString::fromStdString(new_mess.id));
             output.append(" has left the room ");
             output.append(QString::fromStdString(rooms.at(isInRoom(new_mess.roomName))));
@@ -114,11 +94,8 @@ void Client::processPendingDatagrams()
             outputText->append(output);
         } else if((new_mess.op == 3) && isInRoom(new_mess.roomName) >= 0) {
             /* message received */
-            //int mes_len = atoi(string(datagram.data(), 73, 2).c_str());
             int mes_len = new_mess.mesLen;
-            //string message(datagram.data(), 75, mes_len);
             string message(new_mess.message);
-            //QString output(QString::fromStdString(u));
             QString output(QString::fromStdString(new_mess.id));
             output.append(": ");
             output.append(QString::fromStdString(message));
@@ -127,11 +104,6 @@ void Client::processPendingDatagrams()
         } else if(new_mess.op == 4) {
             /* send your list rooms */
             mess.op = 5;
-            //strcpy(mess.message, listOfRooms());
-
-
-
-
 
             strcpy(mess.message, "\0");
             sizeOfRooms = 0;
@@ -146,39 +118,25 @@ void Client::processPendingDatagrams()
                 }
                 mess.message[sizeOfRooms] = '\0';
                 sizeOfRooms++;
-                    //strcat(mess.message + 1, rooms.at(i).c_str());
-                //mess.message[strlen(mess.message)+1] = '\0';
-                //sizeOfRooms += strlen(rooms.at(i).c_str()) + 1;
             }
             mess.message[sizeOfRooms] = '\0';
             sizeOfRooms++;
 
-
-
-
-
-            //char *rlist = listOfRooms();
             mess.mesLen = sizeOfRooms;
-            //for(int j = 0; j < mess.mesLen; j++)
-                //mess.message[j] = rlist[j];
-            //mess.mesLen = (uint16_t)strlen(mess.message);
             printf("list of lists: %s with dim = %d\n", mess.message, mess.mesLen);
 
             /* send back message with the list */
             QByteArray datagram_to_send = QByteArray(mess.version);
             for(int i = strlen(mess.version); i < 8; i++) {
-                //datagram += QByteArray::number(0);
                 datagram_to_send += '\0';
             };
             strcpy(mess.roomName,"");
             datagram_to_send += QByteArray(mess.roomName);
             for(int i = strlen(mess.roomName); i < 32; i++) {
-                //datagram += QByteArray::number(0);
                 datagram_to_send += '\0';
             };
             datagram_to_send += QByteArray(mess.id);
             for(int i = strlen(mess.id); i < 32; i++) {
-                //datagram += QByteArray::number(0);
                 datagram_to_send += '\0';
             }
             datagram_to_send += mess.op;
@@ -186,7 +144,6 @@ void Client::processPendingDatagrams()
             datagram_to_send += (char) mess.mesLen;
             datagram_to_send += (mess.mesLen >> 8);
             printf("--size after mesLen added: %d\n", datagram_to_send.size());
-            //datagram_to_send += QByteArray(mess.message);
             for(int i = 0; i < mess.mesLen; i++)
                 datagram_to_send += mess.message[i];
             printf("--size after message added: %d\n", datagram_to_send.size());
@@ -194,30 +151,21 @@ void Client::processPendingDatagrams()
             udpSocket->writeDatagram(datagram_to_send, datagram_to_send.size(),groupAddress, port);
         } else if((new_mess.op == 5) && waitList) {
             /* got answer with list of rooms */
-            //int mes_len = atoi(string(datagram.data(), 73, 2).c_str());
-            //int mes_len = strlen(new_mess.message);
-
             /* empty the list of rooms */
             listRooms.empty();
             QString output = "Rooms:\n";
             if(new_mess.mesLen > 0){
-                //string message(datagram.data(), 74, mes_len);
-                //string message(new_mess.message);
-                //printf("message: %s\n", message.c_str());
-                //message[mess.mesLen] = '\0';
                 string name("");
                 printf("mess: %s\n", new_mess.message);
 
                 int nrNulls = 0;
                 for(int i = 0; i <=  new_mess.mesLen; i ++) {
                     if(new_mess.message[i] == '\0'){
-                        //if(!isRoom(name)){
                         nrNulls ++;
                         if(nrNulls == 2)
                             break;
                         listRooms.push_back(name);
                         output.append(QString::fromStdString(name.c_str()));
-                        //printf("NAME:%s\n", name.c_str());
                         output.append("\n");
                         name = "";
                     } else {
@@ -228,7 +176,6 @@ void Client::processPendingDatagrams()
                 output.append("\n");
                 outputText->append(output);
             }
-            //waitList = false;
             fflush(stdout);
         }
     }
@@ -276,14 +223,12 @@ void Client::sendDatagram()
                 strcpy(mess.roomName, splitted.at(1).toUtf8().constData());
                 printf("joining room %s...\n", splitted.at(1).toUtf8().constData());
                 mess.roomName[strlen(splitted.at(1).toUtf8().constData())] = '\0';
-                //printf("mess.roomName %s\n", mess.roomName);
 
                 mess.op = 1;
                 mess.mesLen = 0;
                 strcpy(mess.message, "\0");
                 if(newRoom(mess.roomName))
                     rooms.push_back(mess.roomName);
-                //printf("new size: %d \n", rooms.size());
             } else if((splitted.at(0) == "LEAVE") && (isInRoom(splitted.at(1).toUtf8().constData()) >= 0)){
                 /* leave a room */
                 ok = true;
@@ -322,17 +267,7 @@ void Client::sendDatagram()
                 strcat(mess.message, " ");
                 mess.mesLen += splitted.at(i).length() + 1;
             }
-            //mess.mesLen --;
-            //strcat(mess.message, "\0", strlen(mess.message));
             mess.message[strlen(mess.message) - 1] = '\0';
-            //mess.mesLen = min(splitted.at(2).length(), USHRT_MAX);
-            //int toChop = splitted.at(2).length();
-            //toChop-= mess.mesLen;
-            //QString newMessage = splitted.at(2);
-            //newMessage.chop(toChop);strcpy(mess.roomName, splitted.at(1).toUtf8().constData());
-            //strcpy(mess.message, newMessage.toUtf8().constData());
-
-
             printf("the message: %s of length %d\n", mess.message,  mess.mesLen);
         }} else{
             ok = false;
@@ -347,17 +282,14 @@ void Client::sendDatagram()
                 mess.roomName[strlen(mess.roomName)] = '\0';
                 QByteArray datagram = QByteArray(mess.version);
                 for(int i = strlen(mess.version); i < 8; i++) {
-                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 };
                 datagram += QByteArray(mess.roomName);
                 for(int i = strlen(mess.roomName); i < 32; i++) {
-                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 };
                 datagram += QByteArray(mess.id);
                 for(int i = strlen(mess.id); i < 32; i++) {
-                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 }
                 datagram += mess.op;
@@ -369,23 +301,19 @@ void Client::sendDatagram()
                 udpSocket->writeDatagram(datagram, datagram.size(),groupAddress, port);
             }
             udpSocket->leaveMulticastGroup(groupAddress);
-            //udpSocket->disconnectFromHost();
             udpSocket->close();
             exit(0);
         }else{
                 QByteArray datagram = QByteArray(mess.version);
                 for(int i = strlen(mess.version); i < 8; i++) {
-                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 };
                 datagram += QByteArray(mess.roomName);
                 for(int i = strlen(mess.roomName); i < 32; i++) {
-                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 };
                 datagram += QByteArray(mess.id);
                 for(int i = strlen(mess.id); i < 32; i++) {
-                    //datagram += QByteArray::number(0);
                     datagram += '\0';
                 }
                 datagram += mess.op;
@@ -393,7 +321,6 @@ void Client::sendDatagram()
                 datagram += ((char) mess.mesLen);
                 datagram += (mess.mesLen >> 8);
                 printf("datagram size after adding msg len: %d\n", datagram.size());
-                //datagram += mess.mesLen;
                 datagram += QByteArray(mess.message);
                 if(mess.mesLen > 0)
                     datagram += '\0';
@@ -411,9 +338,7 @@ int Client::isInRoom(string room){
         cp[strlen(room.c_str())] = '\0';
         printf("CP got: %s\n", cp);
         fflush(stdout);
-        //printf("room: %s   rooms[i]: %s", room.c_str(), cp);
         printf("comparing rooms: %s and %s", room.c_str(), cp);
-        //if(strcmp(cp, rooms.at(i).c_str()) == 0){
         if(strcmp(cp, room.c_str()) == 0){
             return i;
         }

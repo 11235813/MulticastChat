@@ -12,10 +12,6 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    receiver.cpp \
     client.cpp
 
-HEADERS  += receiver.h \
-    client.h
-
-FORMS    += receiver.ui
+HEADERS  += client.h

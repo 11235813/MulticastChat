@@ -13,7 +13,7 @@ Client::Client(QWidget *parent)
     listRooms.push_back(string("room1\0"));
     listRooms.push_back(string("room2\0"));
     listRooms.push_back(string("room3\0"));
-    listRooms.push_back(string("cristinaPrecup\0"));
+    listRooms.push_back(string("name\0"));
 
     okButton = new QPushButton(tr("&Ok"));
     cancelButton = new QPushButton(tr("&Clear"));
